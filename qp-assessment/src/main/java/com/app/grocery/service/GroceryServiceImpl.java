@@ -88,8 +88,13 @@ public class GroceryServiceImpl implements GroceryService{
     public Order addOrder(int userId, Map<Integer,Integer> itemsAndQuantity) {
         List<Integer> idList = new ArrayList(itemsAndQuantity.keySet());
         List<GroceryItem> groceryItemList = groceryRepo.getGroceryItemsForIds(idList);
+        List<GroceryItem> groceryItemsCopy = new ArrayList<>(groceryItemList);
         for (GroceryItem item : groceryItemList){
             item.setInventory(itemsAndQuantity.get(item.getId()));
+        }
+        for(GroceryItem item : groceryItemsCopy){
+            item.setInventory(item.getInventory() - itemsAndQuantity.get(item.getId()));
+            groceryRepo.updateGroceryInventory(item);
         }
         User user = groceryRepo.getUserBasedOnId(userId);
         Order order = new Order(user, groceryItemList);
